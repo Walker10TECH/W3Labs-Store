@@ -266,7 +266,7 @@ function renderStore(filter = 'all', search = '') {
 
             try {
                 // Caminho ajustado: sobe um nível (..) para sair da pasta HTML e entra na pasta JS
-                const response = await fetch('DataStore.json');
+                const response = await fetch('datastore.json');
                 storeData = await response.json();
                 renderStore();
                 // setupCarousel(); // Esta função não está definida neste arquivo e pode estar causando um erro.
