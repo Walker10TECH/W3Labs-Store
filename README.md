@@ -19,8 +19,6 @@ O objetivo principal foi criar um hub centralizado para o meu acervo pessoal. Em
 
 ## 🚀 Tecnologias Utilizadas
 
-*(Substitua as tecnologias abaixo pelas que você realmente usou no projeto)*
-
 - **Front-end:** [HTML]
 - **Estilização:** [CSS]
 - **Back-end / API:** [JS]
