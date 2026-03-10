@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,170 +11,314 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
+            theme: {
+                extend: {
+                    boxShadow: {
+                        '3d-button': '0 4px 0 #004d35, 0 10px 20px rgba(1, 135, 95, 0.3)',
+                        '3d-button-active': '0 0px 0 #004d35, 0 2px 5px rgba(1, 135, 95, 0.3)',
+                        'card-hover': '0 20px 40px -5px rgba(0, 0, 0, 0.3), 0 10px 20px -5px rgba(0, 0, 0, 0.2)',
+                    }
+                }
+            }
         }
     </script>
-    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* ==========================================================================
+           1. Variables & Reset
+           ========================================================================== */
+        :root {
+            --play-green: #01875f;
+            --background: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --modal-bg: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #cbebff 100%);
+            --primary-gradient: linear-gradient(135deg, #01a877 0%, #016f4e 100%);
+            --scrollbar-thumb: #cbd5e1;
+        }
+
+        .dark {
+            --background: #121214;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --glass-bg: rgba(32, 33, 36, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --modal-bg: #202124;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --primary-gradient: linear-gradient(135deg, #01875f 0%, #004d35 100%);
+            --scrollbar-thumb: #475569;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: color 0.3s ease, background-image 0.5s ease;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ==========================================================================
+           2. 3D & Component Styles
+           ========================================================================== */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        /* 3D Category Pills */
+        .category-pill {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        .category-pill.active {
+            background-image: var(--primary-gradient);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 0 #004d35, 0 8px 15px rgba(1, 135, 95, 0.3);
+            border-color: transparent !important;
+        }
+        .category-pill.active:active {
+            transform: translateY(1px);
+            box-shadow: 0 0px 0 #004d35, 0 2px 5px rgba(1, 135, 95, 0.3);
+        }
+
+        /* 3D App Card Hover Effects */
+        .app-card-3d {
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            will-change: transform, box-shadow;
+        }
+        .app-card-3d::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 1px var(--glass-border);
+            pointer-events: none;
+        }
+        .group:hover .app-card-3d {
+            transform: translateY(-10px) rotateX(2deg) rotateY(-2deg) scale(1.02);
+            box-shadow: var(--tw-shadow-card-hover);
+        }
+        .group:hover .card-image {
+            transform: scale(1.08);
+        }
+
+        /* Modal specific styles */
+        .modal-content {
+            background: var(--modal-bg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--glass-border);
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .is-open .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* ==========================================================================
+           3. Utilities
+           ========================================================================== */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Evita cliques indesejados no video de fundo */
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .custom-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background-color: #01875f; }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .reveal-item { 
+            animation: reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
+            opacity: 0; 
+        }
+    </style>
 </head>
-<body class="bg-white dark:bg-[#202124] text-[#202124] dark:text-[#e8eaed] transition-colors duration-300 font-['Inter']">
+<body class="transition-colors duration-300">
 
     <!-- Header -->
-    <header class="fixed top-0 w-full z-50 bg-white dark:bg-[#202124] border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+    <header class="fixed top-0 w-full z-50 glass transition-colors duration-300">
         <div class="max-w-[1440px] mx-auto px-6">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center gap-12">
                     <div class="flex items-center gap-3 cursor-pointer group">
-                        <img src="splash-icon.png" alt="W3Labs Store" class="w-12 h-12 rounded-full object-cover group-hover:rotate-6 transition-transform drop-shadow-lg">
-                        <h1 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-white">W3Labs <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-red-600">Store</span></h1>
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 via-purple-600 to-red-600 flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform duration-500">
+                            <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+                        </div>
+                        <h1 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-white drop-shadow-sm">W3Labs <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-red-600">Store</span></h1>
                     </div>
 
-                    <div class="hidden lg:flex items-center bg-[#f1f3f4] dark:bg-[#303134] rounded-full px-5 py-3 w-[500px] transition-all focus-within:shadow-md focus-within:bg-white dark:focus-within:bg-[#303134]">
-                        <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
-                        <input type="text" id="searchInput" placeholder="Pesquisar jogos e apps" class="bg-transparent border-none focus:ring-0 w-full ml-3 text-sm outline-none font-medium text-gray-700 dark:text-gray-200 placeholder-gray-500">
+                    <div class="hidden lg:flex items-center bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-gray-700 rounded-full px-5 py-3 w-[500px] transition-all focus-within:shadow-lg focus-within:bg-white dark:focus-within:bg-[#303134] focus-within:border-blue-500">
+                        <i data-lucide="search" class="w-4 h-4 text-gray-500 dark:text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Pesquisar jogos 3D e pacotes..." class="bg-transparent border-none focus:ring-0 w-full ml-3 text-sm outline-none font-medium text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400">
                     </div>
                 </div>
 
                 <div class="flex items-center gap-6">
-                    <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#303134] transition-colors text-gray-600 dark:text-gray-300">
-                        <i data-lucide="moon" id="themeIcon" class="w-6 h-6"></i>
+                    <button onclick="toggleTheme()" class="p-3 rounded-full bg-white/50 dark:bg-black/20 hover:bg-white dark:hover:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 transition-all text-gray-600 dark:text-gray-300 hover:scale-110 active:scale-95">
+                        <i data-lucide="moon" id="themeIcon" class="w-5 h-5"></i>
                     </button>
                 </div>
             </div>
 
-            <nav class="flex gap-3 pb-0 overflow-x-auto hide-scrollbar border-b border-transparent">
-                <button onclick="filterCategory('all')" id="tab-all" class="category-pill active px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-transparent">Para você</button>
-                <button onclick="filterCategory('gta')" id="tab-gta" class="category-pill px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#303134]">Grand Theft Auto Series</button>
-                <button onclick="filterCategory('sports')" id="tab-sports" class="category-pill px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#303134]">Esportes</button>
-                <button onclick="filterCategory('open-world')" id="tab-open-world" class="category-pill px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#303134]">Mundo Aberto</button>
-                <button onclick="filterCategory('racing')" id="tab-racing" class="category-pill px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#303134]">Corridas</button>
+            <nav class="flex gap-3 pb-4 pt-2 overflow-x-auto hide-scrollbar border-b border-transparent">
+                <button onclick="filterCategory('all')" id="tab-all" class="category-pill active px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap border border-transparent">Para você</button>
+                <button onclick="filterCategory('gta')" id="tab-gta" class="category-pill px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap bg-white/60 dark:bg-black/30 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">Grand Theft Auto Series</button>
+                <button onclick="filterCategory('sports')" id="tab-sports" class="category-pill px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap bg-white/60 dark:bg-black/30 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">Esportes</button>
+                <button onclick="filterCategory('open-world')" id="tab-open-world" class="category-pill px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap bg-white/60 dark:bg-black/30 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">Mundo Aberto</button>
+                <button onclick="filterCategory('racing')" id="tab-racing" class="category-pill px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap bg-white/60 dark:bg-black/30 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">Corridas</button>
             </nav>
         </div>
     </header>
 
     <main class="max-w-[1440px] mx-auto px-6 py-10 mt-36">
-        <!-- Featured Carousel Section -->
-        <section id="featuredCarouselSection" class="relative mb-16 group">
-            <div id="carouselContainer" class="overflow-x-auto hide-scrollbar" style="scroll-snap-type: x mandatory; scroll-behavior: smooth;">
-                <div id="carouselTrack" class="flex gap-4 md:gap-6">
-                    <!-- Carousel items will be injected by JS -->
-                </div>
-            </div>
-            <!-- Carousel Navigation -->
-            <button id="carouselPrev" class="absolute top-1/2 -left-4 md:-left-6 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-white/80 dark:bg-[#303134]/80 backdrop-blur-sm shadow-md rounded-full text-gray-800 dark:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:opacity-20 disabled:cursor-not-allowed">
-                <i data-lucide="chevron-left" class="w-5 h-5 md:w-6 md:h-6"></i>
-            </button>
-            <button id="carouselNext" class="absolute top-1/2 -right-4 md:-right-6 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-white/80 dark:bg-[#303134]/80 backdrop-blur-sm shadow-md rounded-full text-gray-800 dark:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:opacity-20 disabled:cursor-not-allowed">
-                <i data-lucide="chevron-right" class="w-5 h-5 md:w-6 md:h-6"></i>
-            </button>
-        </section>
-
         <!-- Dynamic Content Grid -->
         <div id="contentSections" class="space-y-24">
             <!-- Render via JS -->
         </div>
-
     </main>
 
-    <footer class="max-w-[1440px] mx-auto px-6 py-10 mt-16">
-        <div class="border-t border-gray-200 dark:border-gray-800 pt-10 text-center text-gray-500 dark:text-gray-400">
+    <footer class="max-w-[1440px] mx-auto px-6 py-10 mt-16 border-t border-gray-200 dark:border-gray-800">
+        <div class="text-center text-gray-500 dark:text-gray-400">
             <div class="flex items-center justify-center gap-2 mb-4">
-                <img src="splash-icon.png" class="w-6 h-6 rounded-full object-cover grayscale opacity-50">
-                <h3 class="font-bold">W3Labs Store</h3>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-400 to-gray-600 flex items-center justify-center text-white opacity-50">
+                    <i data-lucide="gamepad-2" class="w-4 h-4"></i>
+                </div>
+                <h3 class="font-bold tracking-wider uppercase text-sm">W3Labs Store</h3>
             </div>
             <p class="text-sm font-medium">&copy; 2026 W3Labs Store.</p>
-            <p class="text-xs mt-2"> Todos os direitos reservados</p>
+            <p class="text-xs mt-2 opacity-70">Experiência 3D Aprimorada. Todos os direitos reservados.</p>
         </div>
     </footer>
 
     <!-- Modal Detalhado -->
-    <div id="itemModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 md:p-8">
-        <div class="modal-content bg-white dark:bg-[#202124] rounded-3xl w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col text-[#202124] dark:text-[#e8eaed]">
+    <div id="itemModal" class="fixed inset-0 bg-gray-900/80 dark:bg-black/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4 md:p-8 transition-opacity duration-300 opacity-0">
+        <div class="modal-content w-full max-w-6xl max-h-[95vh] overflow-hidden rounded-[2rem] flex flex-col relative bg-gradient-to-b from-white to-gray-50 dark:from-[#202124] dark:to-[#171719]">
             
-            <div class="absolute top-8 right-8 z-[70]">
-                <button onclick="closeModal()" class="w-14 h-14 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all border border-white/10">
-                    <i data-lucide="x" class="w-8 h-8"></i>
+            <div class="absolute top-6 right-6 z-[70]">
+                <button onclick="closeModal()" class="w-12 h-12 flex items-center justify-center bg-black/20 hover:bg-red-500/80 backdrop-blur-md text-white rounded-full transition-all border border-white/20 shadow-lg hover:scale-110 active:scale-95">
+                    <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
 
-            <div class="overflow-y-auto custom-scroll">
+            <div class="overflow-y-auto custom-scroll h-full">
                 <!-- Hero Video/Image Header -->
-                <div id="modalHero" class="w-full bg-[#202124]">
+                <div id="modalHero" class="w-full relative bg-black shadow-[inset_0_-20px_50px_rgba(0,0,0,0.5)]">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#202124] to-transparent z-10 pointer-events-none"></div>
                     <div id="videoWrapper" class="video-container hidden">
                         <!-- iframe inject here -->
                     </div>
-                    <div id="imageFallback" class="h-64 md:h-96 flex items-center justify-center text-white bg-gradient-to-br">
-                        <i data-lucide="image" class="w-20 h-20 opacity-20"></i>
+                    <div id="imageFallback" class="h-64 md:h-[400px] flex items-center justify-center text-white bg-gradient-to-br relative">
+                        <i data-lucide="image" class="w-20 h-20 opacity-20 relative z-10"></i>
                     </div>
                 </div>
 
-                <div class="p-10 md:p-16 -mt-12">
-                    <div class="flex flex-col md:flex-row gap-16 items-start">
-                        <!-- Left Info -->
+                <div class="p-8 md:p-16 relative z-20 -mt-20 md:-mt-32">
+                    <div class="flex flex-col md:flex-row gap-12 md:gap-16 items-start">
+                        <!-- Left Info / Cover -->
                         <div class="shrink-0 w-full md:w-72">
-                            <div id="modalIcon" class="w-56 h-56 md:w-72 md:h-72 rounded-3xl shadow-lg mx-auto md:mx-0 flex items-center justify-center text-white relative z-10 bg-gradient-to-br overflow-hidden">
+                            <div id="modalIcon" class="w-48 h-48 md:w-72 md:h-[432px] rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] mx-auto md:mx-0 flex items-center justify-center text-white relative bg-gradient-to-br overflow-hidden border-4 border-white/10 dark:border-gray-700/50 transform-gpu transition-transform hover:scale-[1.02]">
                                 <!-- Cover Art Injected Here -->
                             </div>
                             
                             <div class="mt-8 space-y-4">
-                                <a id="modalDownloadLink" href="#" class="w-full bg-[#01875f] hover:bg-[#016f4e] text-white py-4 rounded-full font-bold text-base shadow-md transition-all flex items-center justify-center gap-3 active:scale-95">
-                                    <i data-lucide="download" class="w-6 h-6"></i> ABRIR NO CLIENTE TORRENT
+                                <!-- Botão 3D -->
+                                <a id="modalDownloadLink" href="#" class="w-full bg-gradient-to-b from-[#01c78e] to-[#01875f] hover:from-[#01d698] hover:to-[#01986b] text-white py-4 rounded-2xl font-black text-sm shadow-3d-button transition-all flex items-center justify-center gap-3 active:translate-y-1 active:shadow-3d-button-active tracking-wide">
+                                    <i data-lucide="download" class="w-5 h-5"></i> DOWNLOAD TORRENT
                                 </a>
-                                <div class="flex gap-3">
-                                    <button class="flex-1 bg-gray-100 dark:bg-[#303134] py-3 rounded-full font-bold text-sm hover:bg-gray-200 dark:hover:bg-[#3c4043] transition-all text-[#01875f]">FAVORITAR</button>
-                                    <button id="copyMagnetLink" class="flex-1 bg-gray-100 dark:bg-[#303134] py-3 rounded-full font-bold text-sm hover:bg-gray-200 dark:hover:bg-[#3c4043] transition-all flex items-center justify-center gap-2 text-[#01875f]"><i data-lucide="copy" class="w-4 h-4"></i> <span>COPIAR LINK</span></button>
+                                <div class="flex gap-3 mt-4">
+                                    <button class="flex-1 bg-gradient-to-b from-gray-100 to-gray-200 dark:from-[#3a3b3e] dark:to-[#2c2d30] border-b-2 border-gray-300 dark:border-[#1a1a1c] py-3 rounded-2xl font-bold text-xs hover:brightness-110 transition-all text-[#01875f] dark:text-[#01d698] shadow-sm active:translate-y-[2px] active:border-b-0">FAVORITAR</button>
+                                    <button id="copyMagnetLink" class="flex-1 bg-gradient-to-b from-gray-100 to-gray-200 dark:from-[#3a3b3e] dark:to-[#2c2d30] border-b-2 border-gray-300 dark:border-[#1a1a1c] py-3 rounded-2xl font-bold text-xs hover:brightness-110 transition-all flex items-center justify-center gap-2 text-[#01875f] dark:text-[#01d698] shadow-sm active:translate-y-[2px] active:border-b-0">
+                                        <i data-lucide="link" class="w-4 h-4"></i> <span class="tracking-wide">COPIAR LINK</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Main Content -->
-                        <div class="flex-grow">
+                        <div class="flex-grow pt-8 md:pt-32">
                             <div class="mb-8">
-                                <h2 id="modalTitle" class="text-5xl md:text-6xl font-black mb-3 tracking-tight">--</h2>
-                                <div class="flex items-center gap-4 text-[#01875f] font-bold text-lg">
+                                <h2 id="modalTitle" class="text-4xl md:text-6xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 drop-shadow-sm">--</h2>
+                                <div class="flex items-center gap-3 text-[#01875f] dark:text-[#01c78e] font-bold text-lg">
+                                    <i data-lucide="shield-check" class="w-5 h-5"></i>
                                     <span id="modalAuthor">W3Labs</span>
-                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                                    <span class="text-gray-400">v1.12.4</span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                                    <span class="text-gray-500 dark:text-gray-400">Verificado</span>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 py-8 border-y border-gray-100 dark:border-gray-800 mb-10">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 py-8 border-y border-gray-200 dark:border-gray-800/50 mb-10 bg-white/30 dark:bg-black/10 rounded-3xl px-6 shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)]">
                                 <div>
-                                    <span class="text-[10px] uppercase font-black text-gray-400 block mb-1">Tamanho</span>
-                                    <span id="modalSize" class="text-2xl font-bold">--</span>
+                                    <span class="text-[10px] uppercase font-black text-gray-500 dark:text-gray-400 block mb-1">Tamanho</span>
+                                    <span id="modalSize" class="text-2xl font-bold text-gray-800 dark:text-white">--</span>
                                 </div>
                                 <div>
-                                    <span class="text-[10px] uppercase font-black text-gray-400 block mb-1">Repack</span>
-                                    <span id="modalRepack" class="text-2xl font-bold">DODI</span>
+                                    <span class="text-[10px] uppercase font-black text-gray-500 dark:text-gray-400 block mb-1">Repack</span>
+                                    <span id="modalRepack" class="text-2xl font-bold text-gray-800 dark:text-white">--</span>
                                 </div>
                                 <div>
-                                    <span class="text-[10px] uppercase font-black text-gray-400 block mb-1">Downloads</span>
-                                    <span class="text-2xl font-bold">+2.4k</span>
+                                    <span class="text-[10px] uppercase font-black text-gray-500 dark:text-gray-400 block mb-1">Downloads</span>
+                                    <span class="text-2xl font-bold text-gray-800 dark:text-white">+10k</span>
                                 </div>
                                 <div>
-                                    <span class="text-[10px] uppercase font-black text-gray-400 block mb-1">Classificação</span>
-                                    <span class="text-2xl font-bold text-amber-500 flex items-center gap-1">4.9 <i data-lucide="star" class="w-5 h-5 fill-amber-500"></i></span>
+                                    <span class="text-[10px] uppercase font-black text-gray-500 dark:text-gray-400 block mb-1">Classificação</span>
+                                    <span class="text-2xl font-bold text-amber-500 flex items-center gap-1 drop-shadow-sm">4.9 <i data-lucide="star" class="w-5 h-5 fill-amber-500"></i></span>
                                 </div>
                             </div>
 
                             <div class="space-y-12">
                                 <div>
-                                    <h3 class="text-2xl font-bold mb-4">Sobre o Jogo</h3>
-                                    <p id="modalDesc" class="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">---</p>
+                                    <h3 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="book-open" class="text-[#01875f]"></i> Sobre o Jogo</h3>
+                                    <p id="modalDesc" class="text-gray-600 dark:text-gray-300 leading-relaxed text-lg font-medium">---</p>
                                 </div>
 
-                                <div class="bg-gray-50 dark:bg-[#303134] p-8 rounded-3xl border border-gray-100 dark:border-gray-800">
-                                    <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
-                                        <i data-lucide="cpu" class="w-6 h-6 text-[#01875f]"></i> Requisitos Mínimos
+                                <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-white dark:from-[#2a2b2f] dark:to-[#202124] p-8 md:p-10 rounded-[2rem] border border-gray-200 dark:border-gray-700 shadow-lg">
+                                    <div class="absolute top-0 right-0 p-8 opacity-5">
+                                        <i data-lucide="cpu" class="w-48 h-48"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold mb-8 flex items-center gap-3 relative z-10 text-gray-800 dark:text-white">
+                                        <i data-lucide="hard-drive" class="w-6 h-6 text-[#01875f] dark:text-[#01c78e]"></i> Requisitos do Sistema
                                     </h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm">
-                                        <div class="space-y-4">
-                                            <p id="req-os"><strong class="block text-gray-400 uppercase text-[10px] font-black">Sistema Operacional</strong> --</p>
-                                            <p id="req-processor"><strong class="block text-gray-400 uppercase text-[10px] font-black">Processador</strong> --</p>
-                                            <p id="req-memory"><strong class="block text-gray-400 uppercase text-[10px] font-black">Memória</strong> --</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 text-sm relative z-10">
+                                        <div class="space-y-6">
+                                            <div id="req-os" class="bg-white/50 dark:bg-black/20 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800"><strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Sistema Operacional</strong> --</div>
+                                            <div id="req-processor" class="bg-white/50 dark:bg-black/20 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800"><strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Processador</strong> --</div>
+                                            <div id="req-memory" class="bg-white/50 dark:bg-black/20 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800"><strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Memória</strong> --</div>
                                         </div>
-                                        <div class="space-y-4">
-                                            <p id="req-graphics"><strong class="block text-gray-400 uppercase text-[10px] font-black">Gráficos</strong> --</p>
-                                            <p id="req-storage"><strong class="block text-gray-400 uppercase text-[10px] font-black">Armazenamento</strong> --</p>
+                                        <div class="space-y-6">
+                                            <div id="req-graphics" class="bg-white/50 dark:bg-black/20 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800"><strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Gráficos</strong> --</div>
+                                            <div id="req-storage" class="bg-white/50 dark:bg-black/20 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800"><strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Armazenamento</strong> --</div>
                                         </div>
                                     </div>
                                 </div>
@@ -184,6 +328,603 @@
                 </div>
             </div>
         </div>
-    <script src="script.js"></script>
     </div>
-</html> 
+
+    <!-- Application Logic -->
+    <script>
+        // DataStore consolidado e reordenado (IDs 1 a 12)
+        let storeData = [
+            {
+                "id": 1,
+                "type": "gta",
+                "title": "Grand Theft Auto V",
+                "author": "FitGirl Repacks",
+                "size": "45.0 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r7f.jpg",
+                "color": "from-green-500 to-emerald-800",
+                "video": "QkkoHAzjnUs",
+                "torrent": "magnet:?xt=urn:btih:H5SJ5MKENDAB52KXVCHQUFN4KRIO3QU2&dn=Grand%20Theft%20Auto%20V%20%5BSteam%20Legacy%5D%20(2015)&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce",
+                "requirements": {
+                    "os": "Windows 10/11 64 Bit",
+                    "processor": "Intel Core i5 3470 @ 3.2GHz",
+                    "memory": "8 GB RAM",
+                    "graphics": "NVIDIA GTX 660 2GB / AMD HD 7870",
+                    "storage": "110 GB"
+                }
+            },
+            {
+                "id": 2,
+                "type": "gta",
+                "title": "Grand Theft Auto: The Trilogy – The Definitive Edition",
+                "author": "DODI Repacks",
+                "size": "32.5 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co3vde.jpg",
+                "color": "from-orange-500 to-red-800",
+                "video": "D71cBUeAL58",
+                "torrent": "magnet:?xt=urn:btih:CY2V3Q3IRAWHHXMG47XZXU3CQGML72RC&dn=Grand%20Theft%20Auto%20The%20Trilogy%20The%20Definitive%20Edition%20%5BDODI%20Repack%5D&tr=udp%3A%2F%2Faegir.sexy%3A6969%2Fannounce",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel Core i5-2700K / AMD FX-6300",
+                    "memory": "8 GB RAM",
+                    "graphics": "Nvidia GeForce GTX 760 2GB",
+                    "storage": "45 GB"
+                }
+            },
+            {
+                "id": 3,
+                "type": "sports",
+                "title": "FIFA 23",
+                "author": "Ksenia",
+                "size": "48.2 GB",
+                "cover": "https://s2-ge.glbimg.com/X2ekmGBfM9OREbo5HNLplK6MMxc=/0x0:1080x1080/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_bc8228b6673f488aa253bbcb03c80ec5/internal_photos/bs/2022/1/B/SBTBdDQaGDkYQlfFRuVg/fifa-23-mbappe-kerr-ultimate-edition-2.jpg",
+                "lockCover": true,
+                "color": "from-blue-500 to-cyan-800",
+                "video": "o3V-GvvzjE4",
+                "torrent": "magnet:?xt=urn:btih:LNQCQIRNESQJD2PY47KATXAQSAWCME3L&dn=FIFA%2023%20-%20Ultimate%20Edition%20%5BEA-Rip%5D%20by%20Ksenia&tr=http%3A%2F%2Fbt.piratbit.club%2Fannounce%3Fuk%3DmEIL9M3q2L",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel Core i5 6600K / AMD Ryzen 5 1600",
+                    "memory": "8 GB RAM",
+                    "graphics": "NVIDIA GeForce GTX 1050 Ti 4GB",
+                    "storage": "60 GB"
+                }
+            },
+            {
+                "id": 4,
+                "type": "open-world",
+                "title": "Forza Horizon 4",
+                "author": "Canek77",
+                "size": "92.0 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1p98.jpg",
+                "color": "from-pink-500 to-rose-800",
+                "video": "UPONCT8JbbE",
+                "torrent": "magnet:?xt=urn:btih:JMB3JJOIG5P5UFPTYNEMGSR447TVHWU4&dn=Forza%20Horizon%204%20-%20Ultimate%20Edition%20(2018)%20Portable%20by%20Canek77&tr=udp%3A%2F%2Fopentor.net%3A6969",
+                "requirements": {
+                    "os": "Windows 10/11 64-bit",
+                    "processor": "Intel i3-4170 @ 3.7Ghz",
+                    "memory": "8 GB RAM",
+                    "graphics": "NVidia 650TI / AMD R7 250x",
+                    "storage": "95 GB"
+                }
+            },
+            {
+                "id": 5,
+                "type": "gta",
+                "title": "Grand Theft Auto IV",
+                "author": "Other s",
+                "size": "22.0 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2967.jpg",
+                "color": "from-gray-600 to-slate-900",
+                "video": "M80K51DosFo",
+                "torrent": "magnet:?xt=urn:btih:AD6EAO5NMWY3MSPTL3VYWPXAUWLM7PQV&dn=GTA%20IV%20%5BOther%20s%5D&tr=http%3A%2F%2Fbt01.nnm-club.cc%3A2710%2F00d32de0a8fa5b458adf2c9b867bde59%2Fannounce",
+                "requirements": {
+                    "os": "Windows 7 / 8 / 10 / 11",
+                    "processor": "Intel Core 2 Quad 2.4GHz",
+                    "memory": "4 GB RAM",
+                    "graphics": "512MB NVIDIA 8600 / ATI 3870",
+                    "storage": "22 GB"
+                }
+            },
+            {
+                "id": 6,
+                "type": "sports",
+                "title": "eFootball PES 2021",
+                "author": "xatab",
+                "size": "38.5 GB",
+                "cover": "https://bdjogos.com.br/capas/7919-efootball-pes-2021-season-update-capa-1.jpg",
+                "lockCover": true,
+                "color": "from-blue-600 to-indigo-900",
+                "video": "2TPN7s71B9Y",
+                "torrent": "magnet:?xt=urn:btih:WCXGA4WBZOBDTS6BGLBBT56NKCODJLGS&dn=eFootball%20PES%202021%20by%20xatab&tr=udp%3A%2F%2Fopentor.org%3A2710",
+                "requirements": {
+                    "os": "Windows 8.1/10 64-bit",
+                    "processor": "Intel Core i5-3470 / AMD FX 4350",
+                    "memory": "8 GB RAM",
+                    "graphics": "NVIDIA GTX 670 / AMD Radeon HD 7870",
+                    "storage": "40 GB"
+                }
+            },
+            {
+                "id": 7,
+                "type": "open-world",
+                "title": "Marvel's Spider-Man 2",
+                "author": "InsaneRamZes",
+                "size": "85.0 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co6m9v.jpg",
+                "color": "from-red-600 to-blue-800",
+                "video": "ENf1yjCMpZo",
+                "torrent": "magnet:?xt=urn:btih:4TDAVUSSRHCHCSOFHFN6I2VITUUO47O5&dn=Marvel's.Spider-Man.2.Digital.Deluxe.Edition-InsaneRamZes&tr=http%3A%2F%2Fbt3.t-ru.org%2Fann",
+                "requirements": {
+                    "os": "Windows 10/11 64-bit",
+                    "processor": "Intel Core i5-8400 / AMD Ryzen 5 3600",
+                    "memory": "16 GB RAM",
+                    "graphics": "NVIDIA RTX 2060 / AMD RX 5700",
+                    "storage": "90 GB SSD"
+                }
+            },
+            {
+                "id": 8,
+                "type": "open-world",
+                "title": "Red Dead Redemption 2",
+                "author": "FitGirl Repacks",
+                "size": "66.0 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1q1f.jpg",
+                "color": "from-red-700 to-orange-900",
+                "video": "F63h3v9QV7w",
+                "torrent": "magnet:?xt=urn:btih:TIICOFE2Z5NFSATXWKCCNEELH5SBHP4L&dn=Red%20Dead%20Redemption%202%20(2018-2019)&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel Core i7-4770K / AMD Ryzen 5 1500X",
+                    "memory": "12 GB RAM",
+                    "graphics": "Nvidia GTX 1060 6GB / AMD RX 480 4GB",
+                    "storage": "150 GB"
+                }
+            },
+            {
+                "id": 9,
+                "type": "open-world",
+                "title": "Forza Horizon 5",
+                "author": "Canek77",
+                "size": "110.0 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co3vsh.jpg",
+                "color": "from-orange-400 to-pink-600",
+                "video": "FYH9n37B7Yw",
+                "torrent": "magnet:?xt=urn:btih:66P2K4IAHAAG5GSC3FZEBWBS52QYTMTO&dn=Forza%20Horizon%205%20-%20Premium%20Edition%20(2021)%20Portable%20by%20Canek77&tr=udp%3A%2F%2Fopentor.net%3A6969",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel i5-4460 / AMD Ryzen 3 1200",
+                    "memory": "8 GB RAM",
+                    "graphics": "NVidia GTX 1070 / AMD RX 590",
+                    "storage": "130 GB"
+                }
+            },
+            {
+                "id": 10,
+                "type": "racing",
+                "title": "Need for Speed Heat",
+                "author": "DODI Repacks",
+                "size": "35.0 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co3vde.jpg",
+                "color": "from-orange-500 to-red-800",
+                "video": "p4Q3uh2RaZo",
+                "torrent": "magnet:?xt=urn:btih:TPLNN4HFNB6NDYEVMQLEC7OS7EZQ2KUW&dn=Need.For.Speed.Heat.Deluxe.Edition-InsaneRamZes&tr=http%3A%2F%2Fbt.t-ru.org%2Fann",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel Core i5-2700K / AMD FX-6300",
+                    "memory": "8 GB RAM",
+                    "graphics": "Nvidia GeForce GTX 760 2GB",
+                    "storage": "45 GB"
+                },
+                "description": "Need for Speed Heat é um jogo de corrida lançado em 2019, desenvolvido pela Ghost Games e publicado pela Electronic Arts. O jogo se passa na cidade fictícia de Palm City, inspirada em Miami, onde os jogadores participam de corridas de rua durante o dia e enfrentam a polícia à noite."
+            },
+            {
+                "id": 11,
+                "type": "racing",
+                "title": "Need for Speed Underground 2",
+                "author": "Other s",
+                "size": "4.0 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2967.jpg",
+                "color": "from-gray-600 to-slate-900",
+                "video": "xYVIrJBJOhE",
+                "torrent": "magnet:?xt=urn:btih:GVFPCK4A3Q3XUGBSKLDORENQ4KVCTUQA&dn=NFS.%20Underground%202%20(2004)%20RePack%20by%20Canek77&tr=udp%3A%2F%2Fopentor.net%3A6969",
+                "requirements": {
+                    "os": "Windows 7 / 8 / 10 / 11",
+                    "processor": "Intel Pentium 4 2.0GHz",
+                    "memory": "4 GB RAM",
+                    "graphics": "512MB NVIDIA 8600 / ATI 3870",
+                    "storage": "22 GB"
+                },
+                "description": "Need for Speed Underground 2 é um jogo de corrida lançado em 2004, desenvolvido pela EA Black Box e publicado pela Electronic Arts. O jogo é a sequência de Need for Speed Underground e apresenta uma grande variedade de carros personalizáveis e corridas de rua em um mundo aberto para explorar."
+            },
+            {
+                "id": 12,
+                "type": "open-world",
+                "title": "God Of War Ragnarok",
+                "author": "FitGirl Repacks",
+                "size": "50.0 GB",
+                "cover": "https://upload.wikimedia.org/wikipedia/pt/a/a5/God_of_War_Ragnar%C3%B6k_capa.jpg",
+                "color": "from-red-700 to-orange-900",
+                "video": "nBwxyqq1ON4",
+                "torrent": "magnet:?xt=urn:btih:DUK32J5R2UCTI4LDIIC6O2GBXGWXHULW&dn=God%20of%20War%20Ragnarok%20%5BFitGirl%20Repack%5D&tr=udp%3A%2F%2Fopentor.net%3A6969",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel Core i5-6600K / AMD Ryzen 5 1400",
+                    "memory": "8 GB RAM",
+                    "graphics": "NVIDIA GeForce GTX 970 / AMD R9 290",
+                    "storage": "100 GB"
+                },
+                "description": "God of War Ragnarok é um jogo de ação-aventura desenvolvido pela Santa Monica Studio e publicado pela Sony Interactive Entertainment em 2022. O jogo é a sequência de God of War (2018) e continua a história de Kratos e seu filho Atreus enquanto enfrentam os desafios do Ragnarok."
+            },
+            {
+                "id": 13,
+                "type": "open-world",
+                "title": "Dragon Ball Z: Kakarot",
+                "author": "RUNE",
+                "size": "46.2 GB",
+                "cover": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1xrs.jpg",
+                "color": "from-orange-500 to-yellow-600",
+                "video": "oXUZVj7I2H8",
+                "torrent": "magnet:?xt=urn:btih:D7912364F57EC6BED65EC0B2E265A4BAD87AA31D&dn=Dragon+Ball+Z+Kakarot+Gokus+Next+Journey-RUNE&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.moeking.me%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.theoks.net%3A6969%2Fannounce&tr=udp%3A%2F%2Fmovies.zsw.ca%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker-udp.gbitt.info%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=http%3A%2F%2Ftracker.gbitt.info%3A80%2Fannounce&tr=http%3A%2F%2Ftracker.ccp.ovh%3A6969%2Fannounce&tr=https%3A%2F%2Ftracker.gbitt.info%3A443%2Fannounce&tr=udp%3A%2F%2Ftracker.dler.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.ccp.ovh%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=http%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337%2Fannounce",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel Core i5-2400 / AMD Phenom II X6 1100T",
+                    "memory": "8 GB RAM",
+                    "graphics": "GeForce GTX 750 Ti / Radeon HD 7950",
+                    "storage": "50 GB"
+                },
+                "description": "Reviva a história de Goku e outros Guerreiros Z em DRAGON BALL Z: KAKAROT! Além das batalhas épicas, experimente a vida no mundo de DRAGON BALL Z lutando, pescando, comendo e treinando com Goku, Gohan, Vegeta e outros."
+            },
+            {
+                "id": 14,
+                "type": "sports",
+                "title": "FIFA 20",
+                "author": "DODI Repacks",
+                "size": "35.6 GB",
+                "cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtMD-4QxBOncNNA6GwwZIOgf1Oc4ICQC_b9Q&s",
+                "lockCover": true,
+                "color": "from-pink-600 to-purple-900",
+                "video": "vgQNOIhRsV4",
+                "torrent": "magnet:?xt=urn:btih:96C82C92CA2AFCCB232B6DBD581558D6E0988A7D&dn=FIFA+20+%28v1.0.66.8249+%2B+MULTi20%29+%28From+35.6+GB%29+%28Fast+Install%29+%5BDODI+Repack%5D+&tr=udp%3A%2F%2F9.rarbg.to%3A2870%2Fannounce&tr=udp%3A%2F%2Feddie4.nl%3A6969%2Fannounce&tr=udp%3A%2F%2Fthetracker.org%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337&tr=udp%3A%2F%2F9.rarbg.com%3A2710%2Fannounce&tr=udp%3A%2F%2Fexplodie.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker1.wasabii.com.tw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.cypherpunks.ru%3A6969%2Fannounce&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=http%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "AMD Phenom II X4 965 / Intel Core i3-2100",
+                    "memory": "8 GB RAM",
+                    "graphics": "AMD Radeon HD 7850 / NVIDIA GTX 660",
+                    "storage": "50 GB"
+                },
+                "description": "Desenvolvido pela EA SPORTS, FIFA 20 traz dois lados do Jogo do Mundo à vida - o prestígio dos palcos profissionais e uma nova e autêntica experiência de futebol de rua com o EA SPORTS VOLTA FOOTBALL. O jogo oferece mais inteligência de futebol, encorajando você a viver momentos épicos."
+            },
+            {
+                "id": 15,
+                "type": "sports",
+                "title": "FIFA 21",
+                "author": "DODI Repacks",
+                "size": "35.3 GB",
+                "cover": "https://s2-techtudo.glbimg.com/VC3nkVOmAda02AYCe04T3n-HXW8=/0x0:7200x10200/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_08fbf48bc0524877943fe86e43087e7a/internal_photos/bs/2020/z/N/LRwIwoQiCXHm0omK8TTw/eas-fifa21-standard-keyart-vert-rgb.jpg",
+                "lockCover": true,
+                "color": "from-blue-600 to-indigo-900",
+                "video": "tuLAn9adQpI",
+                "torrent": "magnet:?xt=urn:btih:DF87191E82B732563EAAB9D2B3B5F2E661D69E87&dn=FIFA+21+%28v1.0.72.32477+%2B+MULTi21%29+%28From+35.3+GB%29+%28Fast+Install%29+%5BDODI+Repack%5D+&tr=udp%3A%2F%2F9.rarbg.to%3A2870%2Fannounce&tr=udp%3A%2F%2Feddie4.nl%3A6969%2Fannounce&tr=udp%3A%2F%2Fthetracker.org%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337&tr=udp%3A%2F%2F9.rarbg.com%3A2710%2Fannounce&tr=udp%3A%2F%2Fexplodie.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker1.wasabii.com.tw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.cypherpunks.ru%3A6969%2Fannounce&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=http%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel Core i3-6100 / AMD Athlon X4 880K",
+                    "memory": "8 GB RAM",
+                    "graphics": "NVIDIA GTX 660 2GB / AMD Radeon HD 7850 2GB",
+                    "storage": "50 GB"
+                },
+                "description": "Vença em Equipe no EA SPORTS FIFA 21, com novas formas de jogar em equipe e se expressar nas ruas e no estádio. Desenvolvido pela Frostbite, o FIFA 21 eleva o jogo com novos recursos."
+            },
+            {
+                "id": 16,
+                "type": "sports",
+                "title": "FIFA 22",
+                "author": "VOICES38",
+                "size": "41.5 GB",
+                "cover": "https://sm.ign.com/ign_br/screenshot/default/eas-fifa22-gen4-se-crop-1080x1350_b3xy.png",
+                "lockCover": true,
+                "color": "from-teal-500 to-indigo-800",
+                "video": "vLj-27T-SEQ",
+                "torrent": "magnet:?xt=urn:btih:OH3WH4EF3JEYGHPFEY2VT6T5NWWXSGZH&dn=FIFA.22-VOICES38&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce",
+                "requirements": {
+                    "os": "Windows 10 64-bit",
+                    "processor": "Intel Core i3-6100 / AMD Athlon X4 880K",
+                    "memory": "8 GB RAM",
+                    "graphics": "NVIDIA GTX 660 2GB / AMD Radeon HD 7850 2GB",
+                    "storage": "50 GB"
+                },
+                "description": "Powered by Football, EA SPORTS FIFA 22 aproxima ainda mais o jogo da realidade com avanços fundamentais de gameplay e uma nova temporada de inovações em todos os modos. Sinta a física da bola aprimorada e a nova inteligência artificial tática."
+            }
+        ];
+
+        function renderStore(filter = 'all', search = '') {
+            const container = document.getElementById('contentSections');
+            container.innerHTML = '';
+
+            const categories = [
+                { id: 'gta', label: 'Grand Theft Auto Series', icon: 'crosshair' },
+                { id: 'sports', label: 'Simulação de Esportes', icon: 'trophy' },
+                { id: 'open-world', label: 'Mundo Aberto & Ação', icon: 'compass' },
+                { id: 'racing', label: 'Corridas & Velocidade', icon: 'car-front' }
+            ];
+
+            const filteredCategories = filter === 'all' ? categories : categories.filter(c => c.id === filter);
+            let hasResults = false;
+
+            filteredCategories.forEach(cat => {
+                let items = storeData.filter(item => item.type === cat.id);
+                if (search) {
+                    items = items.filter(item => item.title.toLowerCase().includes(search.toLowerCase()) || item.author.toLowerCase().includes(search.toLowerCase()));
+                }
+
+                if (items.length > 0) {
+                    hasResults = true;
+                    const section = document.createElement('section');
+                    section.innerHTML = `
+                        <div class="flex items-center justify-between mb-8 px-2">
+                            <h3 class="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-4 text-gray-800 dark:text-white drop-shadow-sm">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center shadow-inner border border-white/50 dark:border-gray-700">
+                                    <i data-lucide="${cat.icon}" class="w-5 h-5 text-[#01875f]"></i>
+                                </div>
+                                ${cat.label}
+                            </h3>
+                            <div class="flex items-center gap-2 text-[#01875f] font-bold cursor-pointer group transition-colors hover:text-[#016f4e] bg-white/50 dark:bg-black/20 px-4 py-2 rounded-full border border-gray-200 dark:border-gray-800">
+                                <span class="hidden sm:inline">Ver todos</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
+                            ${items.map(item => `
+                                <div id="card-${item.id}" onclick="openModal(${item.id})" class="group cursor-pointer reveal-item flex flex-col gap-4">
+                                    <!-- 3D Card Visual -->
+                                    <div class="app-card-3d aspect-[2/3] rounded-[1.5rem] overflow-hidden relative shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(0,0,0,0.4)] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#303134] dark:to-[#18191b]">
+                                        <img src="${item.cover}" class="card-image w-full h-full object-cover transition-transform duration-700 ease-out" loading="lazy">
+                                        <!-- Overlay Gradient -->
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <!-- Glow Effect on hover -->
+                                        <div class="absolute -inset-1/2 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-30 blur-2xl transition-opacity duration-500 pointer-events-none"></div>
+                                    </div>
+                                    <div class="px-1">
+                                        <h4 class="font-bold text-base text-gray-900 dark:text-gray-100 leading-tight mb-1 truncate drop-shadow-sm group-hover:text-[#01875f] transition-colors">${item.title}</h4>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                                <span>${item.size}</span>
+                                                <span class="w-1 h-1 rounded-full bg-gray-400/50"></span>
+                                                <span class="text-gray-700 dark:text-gray-300">${item.author.split(' ')[0]}</span>
+                                            </div>
+                                            <div class="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                                                <i data-lucide="download" class="w-3.5 h-3.5 text-[#01875f]"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    container.appendChild(section);
+                }
+            });
+
+            if (!hasResults) {
+                container.innerHTML = `<div class="py-24 text-center opacity-50 flex flex-col items-center justify-center bg-white/30 dark:bg-black/10 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 mx-auto max-w-2xl"><i data-lucide="ghost" class="w-16 h-16 mb-4 text-gray-400"></i><p class="text-xl font-bold">Nenhum resultado encontrado...</p><p class="text-sm mt-2">Tente buscar por outro termo ou limpe os filtros.</p></div>`;
+            }
+            lucide.createIcons();
+            observeItems();
+        }
+
+        function observeItems() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.transitionDelay = `${index * 50}ms`;
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            const items = document.querySelectorAll('.reveal-item');
+            items.forEach(item => observer.observe(item));
+        }
+
+        function filterCategory(id) {
+            document.querySelectorAll('.category-pill').forEach(p => {
+                p.classList.remove('active', 'text-white');
+                p.classList.add('bg-white/60', 'dark:bg-black/30', 'border-gray-200', 'dark:border-gray-700', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
+            });
+            
+            const activeTab = document.getElementById(`tab-${id}`);
+            activeTab.classList.add('active');
+            activeTab.classList.remove('bg-white/60', 'dark:bg-black/30', 'border-gray-200', 'dark:border-gray-700', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
+            
+            renderStore(id, document.getElementById('searchInput').value);
+        }
+
+        const modal = document.getElementById('itemModal');
+        function openModal(id) {
+            const item = storeData.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('modalTitle').innerText = item.title;
+            document.getElementById('modalAuthor').innerText = item.author;
+            document.getElementById('modalSize').innerText = item.size;
+            document.getElementById('modalRepack').innerText = item.author.split(' ')[0];
+            
+            const modalDesc = document.getElementById('modalDesc');
+            if(item.description) {
+                modalDesc.innerText = item.description;
+            } else {
+                fetchWikipediaDescription(item.title, modalDesc);
+            }
+
+            // Set requirements
+            const reqs = item.requirements || {};
+            document.getElementById('req-os').innerHTML = `<strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Sistema Operacional</strong> <span class="text-gray-800 dark:text-gray-200">${reqs.os || 'Não especificado'}</span>`;
+            document.getElementById('req-processor').innerHTML = `<strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Processador</strong> <span class="text-gray-800 dark:text-gray-200">${reqs.processor || 'Não especificado'}</span>`;
+            document.getElementById('req-memory').innerHTML = `<strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Memória</strong> <span class="text-gray-800 dark:text-gray-200">${reqs.memory || 'Não especificado'}</span>`;
+            document.getElementById('req-graphics').innerHTML = `<strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Gráficos</strong> <span class="text-gray-800 dark:text-gray-200">${reqs.graphics || 'Não especificado'}</span>`;
+            document.getElementById('req-storage').innerHTML = `<strong class="block text-[#01875f] dark:text-[#01c78e] uppercase text-[10px] font-black mb-1">Armazenamento</strong> <span class="text-gray-800 dark:text-gray-200">${reqs.storage || 'Não especificado'}</span>`;
+
+            const torrentPath = item.torrent;
+            const downloadButton = document.getElementById('modalDownloadLink');
+            downloadButton.href = torrentPath;
+
+            // --- Logic for Copy Button ---
+            const copyButton = document.getElementById('copyMagnetLink');
+            const newCopyButton = copyButton.cloneNode(true);
+            const copyButtonText = newCopyButton.querySelector('span');
+            copyButtonText.innerText = 'COPIAR LINK';
+            copyButton.parentNode.replaceChild(newCopyButton, copyButton);
+
+            newCopyButton.addEventListener('click', () => {
+                if (!navigator.clipboard) {
+                    copyButtonText.innerText = 'HTTPS NECESS.';
+                    return;
+                }
+                navigator.clipboard.writeText(torrentPath).then(() => {
+                    copyButtonText.innerText = 'COPIADO!';
+                    newCopyButton.classList.add('text-green-500', 'dark:text-green-400');
+                    setTimeout(() => {
+                        copyButtonText.innerText = 'COPIAR LINK';
+                        newCopyButton.classList.remove('text-green-500', 'dark:text-green-400');
+                    }, 2000);
+                }).catch(err => {
+                    copyButtonText.innerText = 'FALHOU';
+                     setTimeout(() => { copyButtonText.innerText = 'COPIAR LINK'; }, 2000);
+                });
+            });
+            
+            const iconBox = document.getElementById('modalIcon');
+            iconBox.innerHTML = `<img src="${item.cover}" alt="${item.title}" class="w-full h-full object-cover">`;
+
+            const videoWrapper = document.getElementById('videoWrapper');
+            const imageFallback = document.getElementById('imageFallback');
+            
+            if (item.video) {
+                videoWrapper.classList.remove('hidden');
+                imageFallback.classList.add('hidden');
+                videoWrapper.innerHTML = `<iframe src="https://www.youtube.com/embed/${item.video}?autoplay=1&mute=1&loop=1&playlist=${item.video}&controls=0&showinfo=0&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            } else {
+                videoWrapper.classList.add('hidden');
+                imageFallback.classList.remove('hidden');
+                imageFallback.className = `h-64 md:h-[400px] flex items-center justify-center text-white bg-gradient-to-br ${item.color} opacity-80`;
+            }
+            
+            modal.classList.remove('hidden');
+            // Timeout leve para permitir o display:block antes da transição de opacidade
+            setTimeout(() => {
+                modal.classList.add('is-open', 'opacity-100');
+                document.body.style.overflow = 'hidden';
+            }, 10);
+            
+            lucide.createIcons();
+        }
+
+        async function fetchWikipediaDescription(title, element) {
+            element.innerHTML = '<span class="animate-pulse">Carregando dados da Wikipédia...</span>';
+            const endpoint = `https://pt.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&redirects=1&origin=*&titles=${encodeURIComponent(title)}`;
+
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                const pages = data.query.pages;
+                const pageId = Object.keys(pages)[0];
+
+                if (pageId === '-1' || !pages[pageId].extract) {
+                    element.innerText = 'Descrição não disponível no momento para este título na base de dados.';
+                } else {
+                    element.innerText = pages[pageId].extract;
+                }
+            } catch (error) {
+                element.innerText = 'Falha ao carregar informações adicionais.';
+            }
+        }
+
+        async function fetchWikiImage(title) {
+            const ptEndpoint = `https://pt.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&titles=${encodeURIComponent(title)}&pithumbsize=600&redirects=1&origin=*`;
+            try {
+                let response = await fetch(ptEndpoint);
+                let data = await response.json();
+                let pages = data.query.pages;
+                let pageId = Object.keys(pages)[0];
+
+                if (pageId !== '-1' && pages[pageId].thumbnail) return pages[pageId].thumbnail.source;
+
+                const enEndpoint = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&titles=${encodeURIComponent(title)}&pithumbsize=600&redirects=1&origin=*`;
+                response = await fetch(enEndpoint);
+                data = await response.json();
+                pages = data.query.pages;
+                pageId = Object.keys(pages)[0];
+
+                if (pageId !== '-1' && pages[pageId].thumbnail) return pages[pageId].thumbnail.source;
+            } catch (error) {
+                console.error(`Erro capa ${title}:`, error);
+            }
+            return null;
+        }
+
+        function closeModal() {
+            modal.classList.remove('is-open', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('videoWrapper').innerHTML = '';
+                document.body.style.overflow = 'auto';
+            }, 400); // Aguarda o fim da transição CSS
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                icon.setAttribute('data-lucide', 'moon');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                icon.setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const activeTab = document.querySelector('.category-pill.active').id.replace('tab-', '');
+            renderStore(activeTab, e.target.value);
+        });
+        
+        // Fecha o modal se clicar fora do conteúdo
+        modal.addEventListener('click', (e) => { 
+            if (e.target === modal) closeModal(); 
+        });
+
+        window.onload = async () => {
+            // Inicializa Tema
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').setAttribute('data-lucide', 'sun');
+            }
+
+            // Renderiza direto do array consolidado no código
+            renderStore();
+            
+            // Tenta buscar capas com alta resolução dinamicamente sem bloquear o render
+            storeData.forEach(async (item) => {
+                if (item.lockCover) return;
+                const wikiCover = await fetchWikiImage(item.title);
+                if (wikiCover) {
+                    item.cover = wikiCover;
+                    const cardEl = document.getElementById(`card-${item.id}`);
+                    if (cardEl) {
+                        const imgEl = cardEl.querySelector('.card-image');
+                        if(imgEl) imgEl.src = wikiCover;
+                    }
+                }
+            });
+
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
